@@ -1,0 +1,93 @@
+.dashboard-container {
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-actions {
+  margin-bottom: 1.5rem;
+}
+
+.btn-create {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.btn-create:hover {
+  background-color: #0056b3;
+}
+
+.metrics {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.metric {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  width: 30%;
+}
+
+.metric-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  color: #007bff;
+}
+
+.teams-list {
+  margin-top: 2rem;
+}
+
+.team-item {
+  background-color: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-edit {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #218838;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
