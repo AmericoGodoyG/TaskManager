@@ -16,21 +16,25 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         {/* Protected Route for Admin */}
         <Route
           path="/admin"
           element={isAuthenticated && userType === "admin" ? <DashboardAdmin /> : <Navigate to="/" />}
         />
-        
-        {/* Protected Route for Student */}
         <Route
-          path="/aluno"
-          element={isAuthenticated && userType === "aluno" ? <DashboardAluno /> : <Navigate to="/" />}
+          path="/admin/equipe/:id"
+          element={isAuthenticated && userType === "admin" ? <Equipes /> : <Navigate to="/" />}
         />
         <Route
           path="/admin/criar-equipe"
           element={isAuthenticated && userType === "admin" ? <Equipes /> : <Navigate to="/" />}
+        />
+
+        {/* Protected Route for Student */}
+        <Route
+          path="/aluno"
+          element={isAuthenticated && userType === "aluno" ? <DashboardAluno /> : <Navigate to="/" />}
         />
       </Routes>
     </Router>

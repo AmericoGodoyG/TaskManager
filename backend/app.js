@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const equipeRoutes = require('./routes/equipesRoutes');
 const tarefaRoutes = require('./routes/tarefaRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const alunosRouter = require('./routes/alunoRoutes');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/equipes', equipeRoutes); // Certifique-se de que o arquivo equipesRoutes.js existe
 app.use('/api/tarefas', tarefaRoutes); // Certifique-se de que o arquivo tarefaRoutes.js existe
 app.use('/api/admin', adminRoutes); // Certifique-se de que o arquivo adminRoutes.js existe
+app.use('/api/alunos', alunosRouter);
 
 // Tratamento de erros para rotas não encontradas
 app.use((req, res, next) => {
