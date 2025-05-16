@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import "../styles/Equipes.css";
 
 export default function Equipes() {
   const [equipes, setEquipes] = useState([]);
-  const [nome, setNome] = useState("");
+  const [nome, setNome] = useState([]);
   const [membros, setMembros] = useState([]); // Array de objetos completos
   const [alunos, setAlunos] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const { id } = useParams();
 
   const token = localStorage.getItem("token");
 
@@ -17,6 +19,27 @@ export default function Equipes() {
     carregarEquipes();
     carregarAlunos();
   }, []);
+
+  useEffect(() => {
+  if (id) {
+    const carregarEquipePorId = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/equipes/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const equipe = res.data;
+        setNome(equipe.nome);
+        setMembros(equipe.membros.map((m) => m._id));
+        setEditandoId(equipe._id);
+      } catch (err) {
+        console.error("Erro ao carregar equipe para edição", err);
+      }
+    };
+
+    carregarEquipePorId();
+  }
+}, [id]);
+
 
   const carregarEquipes = async () => {
     try {
@@ -44,7 +67,7 @@ export default function Equipes() {
     e.preventDefault();
 
     try {
-      const dados = { nome, membros: membros.map((m) => m._id) }; // Enviar apenas os IDs dos membros
+      const dados = { nome, membros };
 
       if (editandoId) {
         await axios.put(`http://localhost:5000/api/equipes/${editandoId}`, dados, {
@@ -80,7 +103,7 @@ export default function Equipes() {
 
   const editarEquipe = (equipe) => {
     setNome(equipe.nome);
-    setMembros(equipe.membros); // Passar os objetos completos dos membros
+    setMembros(equipe.membros.map((m) => m._id)); // Passar os objetos completos dos membros
     setEditandoId(equipe._id);
   };
 
@@ -99,27 +122,27 @@ export default function Equipes() {
         />
 
         <label className="label">Selecionar membros:</label>
-        <select
-          multiple
-          className="select"
-          value={membros.map((membro) => membro._id)} // Garantir que o valor seja o ID
-          onChange={(e) =>
-            setMembros(
-              [...e.target.selectedOptions].map((option) => {
-                const alunoSelecionado = alunos.find(
-                  (aluno) => aluno._id === option.value
-                );
-                return alunoSelecionado; // Adicionar o objeto completo do aluno
-              })
-            )
-          }
-        >
-          {alunos.map((aluno) => (
-            <option key={aluno._id} value={aluno._id}>
-              {aluno.nome} ({aluno.email})
-            </option>
-          ))}
-        </select>
+        <div className="checkbox-list">
+          {alunos
+            .filter((aluno) => aluno.tipo !== "admin")
+            .map((aluno) => (
+              <label key={aluno._id} className="checkbox-item">
+                <input
+                  type="checkbox"
+                  checked={membros.includes(aluno._id)}
+                  onChange={() => {
+                    if (membros.includes(aluno._id)) {
+                      setMembros(membros.filter((id) => id !== aluno._id));
+                    } else {
+                      setMembros([...membros, aluno._id]);
+                    }
+                  }}
+                />
+                {aluno.nome} ({aluno.email})
+              </label>
+            ))}
+        </div>
+
 
         <button type="submit" className="btn">
           {editandoId ? "Salvar" : "Criar"}
