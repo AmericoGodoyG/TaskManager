@@ -39,8 +39,23 @@ function DashboardAdmin() {
     }
   };
 
-  return (
-    <div className="dashboard-container">
+return (
+  <div className="admin-page">
+    <aside className="sidebar">
+      <nav>
+        <ul>
+          <li className="menu-title">Dashboard</li>
+          <li>
+            <Link to="/admin">Equipes</Link>
+          </li>
+          <li>
+            <Link to="/admin/tarefas">Tarefas</Link>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main className="dashboard-container">
       <h2 className="dashboard-title">Dashboard - Admin</h2>
 
       <div className="dashboard-actions">
@@ -79,8 +94,11 @@ function DashboardAdmin() {
           ))
         )}
       </div>
-    </div>
-  );
+    </main>
+  </div>
+);
+
+
 }
 
 export default DashboardAdmin;
