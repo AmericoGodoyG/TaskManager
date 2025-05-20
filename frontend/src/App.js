@@ -6,6 +6,11 @@ import DashboardAdmin from "./pages/DashboardAdmin.jsx";
 import DashboardAluno from "./pages/DashboardAluno.jsx";
 import "./styles/Login.css";
 import Equipes from "./pages/Equipes.jsx";
+import Tarefas from "./pages/TarefasAdmin.jsx";
+import DashboardTarefasAdmin from "./pages/DashboardTarefasAdmin";
+import TarefasAdmin from "./pages/TarefasAdmin";
+
+
 
 function App() {
   const isAuthenticated = localStorage.getItem("token");
@@ -16,6 +21,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/admin/tarefas" element={<DashboardTarefasAdmin />} />
+        <Route path="/admin/criar-tarefa" element={<TarefasAdmin />} />
+        <Route path="/admin/editar-tarefa/:id" element={<TarefasAdmin />} />
 
         {/* Protected Route for Admin */}
         <Route
@@ -29,6 +37,11 @@ function App() {
         <Route
           path="/admin/criar-equipe"
           element={isAuthenticated && userType === "admin" ? <Equipes /> : <Navigate to="/" />}
+        />
+
+        <Route
+          path="/admin/tarefas"
+          element={isAuthenticated && userType === "admin" ? <Tarefas /> : <Navigate to="/" />}
         />
 
         {/* Protected Route for Student */}

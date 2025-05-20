@@ -83,3 +83,14 @@ exports.excluirEquipe = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao excluir equipe' });
   }
 };
+
+exports.getAlunosDaEquipe = async (req, res) => {
+  try {
+    const equipe = await Equipe.findById(req.params.id).populate("membros", "nome");
+    if (!equipe) return res.status(404).json({ erro: "Equipe não encontrada" });
+    res.json(equipe.membros);
+  } catch (err) {
+    res.status(500).json({ erro: "Erro ao buscar alunos" });
+  }
+};
+
