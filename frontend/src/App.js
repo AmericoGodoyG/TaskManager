@@ -6,9 +6,9 @@ import DashboardAdmin from "./pages/DashboardAdmin.jsx";
 import DashboardAluno from "./pages/DashboardAluno.jsx";
 import "./styles/Login.css";
 import Equipes from "./pages/Equipes.jsx";
-import Tarefas from "./pages/TarefasAdmin.jsx";
 import DashboardTarefasAdmin from "./pages/DashboardTarefasAdmin";
 import TarefasAdmin from "./pages/TarefasAdmin";
+import DashboardGeral from "./pages/DashboardGeral";
 
 
 
@@ -21,7 +21,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/admin/tarefas" element={<DashboardTarefasAdmin />} />
         <Route path="/admin/criar-tarefa" element={<TarefasAdmin />} />
         <Route path="/admin/editar-tarefa/:id" element={<TarefasAdmin />} />
 
@@ -41,13 +40,24 @@ function App() {
 
         <Route
           path="/admin/tarefas"
-          element={isAuthenticated && userType === "admin" ? <Tarefas /> : <Navigate to="/" />}
+          element={
+          isAuthenticated && userType === "admin"
+          ? <DashboardTarefasAdmin />
+          : <Navigate to="/" />}
+        />
+
+        <Route
+          path="/admin/geral"
+          element={isAuthenticated && userType === "admin" ? <DashboardGeral /> : <Navigate to="/" />}
         />
 
         {/* Protected Route for Student */}
         <Route
           path="/aluno"
-          element={isAuthenticated && userType === "aluno" ? <DashboardAluno /> : <Navigate to="/" />}
+          element={
+          isAuthenticated && userType === "aluno"
+          ? <DashboardAluno />
+          : <Navigate to="/" />}
         />
       </Routes>
     </Router>

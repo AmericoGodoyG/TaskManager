@@ -1,0 +1,57 @@
+.admin-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-geral {
+  flex: 1; /* Faz ocupar o espaço ao lado da sidebar */
+  padding: 30px;
+}
+
+
+.cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.card {
+  width: 150px;
+  height: 120px;
+  border-radius: 10px;
+  color: white;
+  padding: 15px 10px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card.cyan {
+  background-color: #00d48d;
+}
+
+.card.purple {
+  background-color: #9c27b0;
+}
+
+.lista-tarefas .tarefa-item {
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-size: 0.95rem;
+}
+
+.status-indicator-bar {
+  height: 10px;
+  border-radius: 5px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  transition: background-color 0.3s ease;
+}
+

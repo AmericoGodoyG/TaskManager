@@ -9,37 +9,30 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        senha,
-      });
+  try {
+    const res = await axios.post("http://localhost:5000/api/auth/login", {
+      email,
+      senha,
+    });
 
-      console.log("Resposta do login:", res.data);
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("tipo", res.data.user.tipo);
+    localStorage.setItem("nome", res.data.user.nome);
 
-      // Salvar token e tipo no localStorage
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("tipo", res.data.user.tipo);
-
-      console.log("Tipo salvo no localStorage:", localStorage.getItem("tipo"));
-
-      if (res.data.user.tipo === "admin") {
-
-        console.log("Redirecionando para o Admin");  // Verifique se o código chega aqui
-        navigate("/admin");
-
-      } else {
-
-        console.log("Redirecionando para o Aluno");
-        navigate("/aluno");
-      }
-
-    } catch (err) {
-      setErro(err.response?.data?.erro || "Erro ao fazer login");
+    // Redireciona direto (sem depender da rota protegida)
+    if (res.data.user.tipo === "admin") {
+      window.location.href = "/admin";
+    } else {
+      window.location.href = "/aluno";
     }
-  };
+
+  } catch (err) {
+    setErro(err.response?.data?.erro || "Erro ao fazer login");
+  }
+};
+
 
   return (
     <div className="login-container">
