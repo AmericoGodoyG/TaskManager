@@ -27,6 +27,11 @@ function DashboardTarefasAdmin() {
     fetchTarefas();
   }, []);
 
+    const logout = () => {
+      localStorage.removeItem("token");
+      navigate("/"); 
+    };
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/tarefas/${id}`, {
@@ -51,17 +56,23 @@ function DashboardTarefasAdmin() {
           <ul>
             <li className="menu-title">Dashboard</li>
             <li>
+              <Link to="/admin/geral">Geral</Link>
+            </li>
+            <li>
               <Link to="/admin">Equipes</Link>
             </li>
             <li>
               <Link to="/admin/tarefas">Tarefas</Link>
+            </li>
+            <li>
+                <button onClick={logout} className="logout-button">Sair</button>
             </li>
           </ul>
         </nav>
       </aside>
 
       <main className="dashboard-container">
-        <h2 className="dashboard-title">Dashboard - Tarefas</h2>
+        <h2 className="dashboard-title">Tarefas</h2>
 
         <div className="dashboard-actions">
           <Link to="/admin/criar-tarefa" className="btn-create">

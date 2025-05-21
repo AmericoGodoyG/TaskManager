@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import "../styles/DashboardAdmin.css"; // Importando o CSS para estilização
+import "../styles/DashboardAdmin.css"; 
+import { useNavigate } from "react-router-dom";
 
 function DashboardAdmin() {
   const [equipes, setEquipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [adminNome, setAdminNome] = useState("");
 
   useEffect(() => {
+    const nomeSalvo = localStorage.getItem("nome");
+      if (nomeSalvo) setAdminNome(nomeSalvo);
     const fetchEquipes = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/equipes", {
@@ -25,6 +29,13 @@ function DashboardAdmin() {
 
     fetchEquipes();
   }, []);
+
+  const navigate = useNavigate();
+
+    const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+    };
 
   const handleDelete = async (id) => {
     try {
@@ -46,17 +57,24 @@ return (
         <ul>
           <li className="menu-title">Dashboard</li>
           <li>
+            <Link to="/admin/geral">Geral</Link>
+          </li>
+          <li>
             <Link to="/admin">Equipes</Link>
           </li>
           <li>
             <Link to="/admin/tarefas">Tarefas</Link>
+          </li>
+          <li>
+            <button onClick={logout} className="logout-button">Sair</button>
           </li>
         </ul>
       </nav>
     </aside>
 
     <main className="dashboard-container">
-      <h2 className="dashboard-title">Dashboard - Admin</h2>
+      {adminNome && <h3 className="boas-vindas">Bem-vindo(a), {adminNome}!</h3>}
+      <h2 className="dashboard-title">Equipes</h2>
 
       <div className="dashboard-actions">
         <Link to="/admin/criar-equipe" className="btn-create">
