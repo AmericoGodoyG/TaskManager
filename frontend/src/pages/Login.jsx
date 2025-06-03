@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -9,60 +10,77 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const res = await axios.post("http://localhost:5000/api/auth/login", {
-      email,
-      senha,
-    });
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        senha,
+      });
 
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("tipo", res.data.user.tipo);
-    localStorage.setItem("nome", res.data.user.nome);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("tipo", res.data.user.tipo);
+      localStorage.setItem("nome", res.data.user.nome);
 
-    // Redireciona direto (sem depender da rota protegida)
-    if (res.data.user.tipo === "admin") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/aluno";
+      if (res.data.user.tipo === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/aluno";
+      }
+
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao fazer login");
     }
-
-  } catch (err) {
-    setErro(err.response?.data?.erro || "Erro ao fazer login");
-  }
-};
-
+  };
 
   return (
-    <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Login</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h2>Bem-vindo(a) de volta!</h2>
+          <p>Faça login para acessar sua conta</p>
+        </div>
 
-        {erro && <p className="erro">{erro}</p>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {erro && <div className="erro-container">{erro}</div>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <div className="input-group">
+            <div className="input-icon">
+              <FaEnvelope />
+            </div>
+            <input
+              type="email"
+              placeholder="Seu email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          required
-        />
+          <div className="input-group">
+            <div className="input-icon">
+              <FaLock />
+            </div>
+            <input
+              type="password"
+              placeholder="Sua senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit">Entrar</button>
+          <button type="submit">
+            <FaSignInAlt /> Entrar
+          </button>
 
-        <p>
-          Não tem uma conta? <Link to="/register">Cadastre-se</Link>
-        </p>
-      </form>
+          <div className="auth-footer">
+            <p>
+              Não tem uma conta? <Link to="/register">Cadastre-se</Link>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
