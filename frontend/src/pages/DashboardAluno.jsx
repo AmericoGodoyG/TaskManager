@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { FaTasks, FaSignOutAlt } from 'react-icons/fa';
 import "../styles/DashboardAluno.css";
+import "../styles/DashboardAdmin.css";
 
 function DashboardAluno() {
   const [tarefas, setTarefas] = useState([]);
@@ -68,7 +70,16 @@ function DashboardAluno() {
           <ul>
             <li className="menu-title">Painel do Aluno</li>
             <li>
-                <button onClick={logout} className="logout-button">Sair</button>
+              <Link to="/aluno" className="active">
+                <span><FaTasks /> Minhas Tarefas</span>
+              </Link>
+            </li>
+          </ul>
+          <ul className="sidebar-bottom">
+            <li>
+              <button onClick={logout} className="logout-button">
+                <span><FaSignOutAlt /> Sair</span>
+              </button>
             </li>
           </ul>
         </nav>

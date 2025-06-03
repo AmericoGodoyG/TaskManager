@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "../styles/Login.css";
-
+import { FaUser, FaEnvelope, FaLock, FaUserGraduate, FaUserPlus } from 'react-icons/fa';
 
 function Register() {
   const [nome, setNome] = useState("");
@@ -30,51 +30,80 @@ function Register() {
   };
 
   return (
-    <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Cadastro</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h2>Criar nova conta</h2>
+          <p>Preencha os dados para se cadastrar</p>
+        </div>
 
-        {erro && <p className="erro">{erro}</p>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {erro && <div className="erro-container">{erro}</div>}
 
-        <input
-          type="text"
-          placeholder="Nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          required
-        />
+          <div className="input-group">
+            <div className="input-icon">
+              <FaUser />
+            </div>
+            <input
+              type="text"
+              placeholder="Seu nome completo"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+            />
+          </div>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <div className="input-group">
+            <div className="input-icon">
+              <FaEnvelope />
+            </div>
+            <input
+              type="email"
+              placeholder="Seu melhor email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          required
-        />
+          <div className="input-group">
+            <div className="input-icon">
+              <FaLock />
+            </div>
+            <input
+              type="password"
+              placeholder="Escolha uma senha segura"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required
+            />
+          </div>
 
-        <select
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value)}
-          className="mb-3"
-        >
-          <option value="aluno">Aluno</option>
-          <option value="admin">Admin</option>
-        </select>
+          <div className="input-group">
+            <div className="input-icon">
+              <FaUserGraduate />
+            </div>
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              className="select-tipo"
+            >
+              <option value="aluno">Aluno</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
 
-        <button type="submit">Cadastrar</button>
+          <button type="submit">
+            <FaUserPlus /> Criar conta
+          </button>
 
-        <p>
-          Já tem uma conta? <Link to="/">Faça login</Link>
-        </p>
-      </form>
+          <div className="auth-footer">
+            <p>
+              Já tem uma conta? <Link to="/">Faça login</Link>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

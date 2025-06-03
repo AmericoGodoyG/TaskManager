@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/DashboardAdmin.css";
+import { FaChartPie, FaUsers, FaTasks, FaSignOutAlt } from 'react-icons/fa';
 
 function DashboardTarefasAdmin() {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchTarefas = async () => {
@@ -27,10 +29,10 @@ function DashboardTarefasAdmin() {
     fetchTarefas();
   }, []);
 
-    const logout = () => {
-      localStorage.removeItem("token");
-      navigate("/"); 
-    };
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/"); 
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -56,16 +58,26 @@ function DashboardTarefasAdmin() {
           <ul>
             <li className="menu-title">Dashboard</li>
             <li>
-              <Link to="/admin/geral">Geral</Link>
+              <Link to="/admin/geral" className={location.pathname === '/admin/geral' ? 'active' : ''}>
+                <span><FaChartPie /> Geral</span>
+              </Link>
             </li>
             <li>
-              <Link to="/admin">Equipes</Link>
+              <Link to="/admin" className={location.pathname === '/admin' ? 'active' : ''}>
+                <span><FaUsers /> Equipes</span>
+              </Link>
             </li>
             <li>
-              <Link to="/admin/tarefas">Tarefas</Link>
+              <Link to="/admin/tarefas" className={location.pathname === '/admin/tarefas' ? 'active' : ''}>
+                <span><FaTasks /> Tarefas</span>
+              </Link>
             </li>
+          </ul>
+          <ul className="sidebar-bottom">
             <li>
-                <button onClick={logout} className="logout-button">Sair</button>
+              <button onClick={logout} className="logout-button">
+                <span><FaSignOutAlt /> Sair</span>
+              </button>
             </li>
           </ul>
         </nav>
