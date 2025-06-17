@@ -18,33 +18,37 @@
   flex-direction: column;
   gap: 15px;
   margin-bottom: 30px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-tarefa input,
 .form-tarefa select {
   padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   font-size: 1rem;
 }
 
-.form-tarefa label {
-  font-weight: bold;
+.form-tarefa select {
+  background-color: white;
 }
 
 .form-tarefa button {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .form-tarefa button:hover {
-  background-color: #45a049;
+  background-color: #218838;
 }
 
 .lista-tarefas {
@@ -60,6 +64,27 @@
   border-radius: 10px;
   border: 1px solid #ddd;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+  transition: transform 0.2s ease;
+}
+
+.tarefa-item:hover {
+  transform: translateY(-2px);
+}
+
+.urgencia-alta {
+  border-left: 5px solid #dc3545;
+  background-color: #fff5f5;
+}
+
+.urgencia-media {
+  border-left: 5px solid #ffc107;
+  background-color: #fff9e6;
+}
+
+.urgencia-baixa {
+  border-left: 5px solid #28a745;
+  background-color: #f0fff4;
 }
 
 .tarefa-item h3 {
@@ -68,7 +93,10 @@
 }
 
 .tarefa-item p {
-  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.tarefa-item p:last-of-type {
   margin-bottom: 15px;
 }
 
@@ -79,11 +107,11 @@
 
 .edit-btn, .delete-btn {
   padding: 8px 15px;
-  font-size: 1rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
 .edit-btn {
@@ -105,12 +133,10 @@
 }
 
 .mensagem {
-  margin-top: 15px;
   padding: 10px;
-  border-radius: 5px;
-  font-weight: bold;
+  border-radius: 4px;
+  margin-top: 10px;
   text-align: center;
-  transition: all 0.3s ease;
 }
 
 .mensagem.sucesso {
@@ -125,39 +151,9 @@
   border: 1px solid #f5c6cb;
 }
 
-
 .buttons {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
-}
-
-.edit-btn,
-.delete-btn {
-  padding: 8px 15px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.edit-btn {
-  background-color: #007bff;
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #0056b3;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
 }
 
 

@@ -14,7 +14,8 @@ function TarefasAdmin() {
   const [tipoMensagem, setTipoMensagem] = useState("sucesso");
   const [modoEdicao, setModoEdicao] = useState(false);
   const [idTarefaEditando, setIdTarefaEditando] = useState(null);
-
+  const [tempoEstimado, setTempoEstimado] = useState("");
+  const [urgencia, setUrgencia] = useState("baixa");
 
   useEffect(() => {
     buscarEquipes();
@@ -23,11 +24,13 @@ function TarefasAdmin() {
 
   const iniciarEdicao = (tarefa) => {
     setModoEdicao(true);
-      setIdTarefaEditando(tarefa._id);
-        setDescricao(tarefa.descricao);
-          setDataEntrega(tarefa.dataEntrega.split("T")[0]);
-        setEquipeSelecionada(tarefa.equipe?._id);
-      buscarAlunosDaEquipe(tarefa.equipe?._id);
+    setIdTarefaEditando(tarefa._id);
+    setDescricao(tarefa.descricao);
+    setDataEntrega(tarefa.dataEntrega.split("T")[0]);
+    setEquipeSelecionada(tarefa.equipe?._id);
+    setTempoEstimado(tarefa.tempoEstimado || "");
+    setUrgencia(tarefa.urgencia || "baixa");
+    buscarAlunosDaEquipe(tarefa.equipe?._id);
     setAlunoSelecionado(tarefa.aluno?._id);
   };
 
@@ -40,6 +43,8 @@ function TarefasAdmin() {
           dataEntrega,
           equipe: equipeSelecionada,
           aluno: alunoSelecionado,
+          tempoEstimado: parseInt(tempoEstimado) || null,
+          urgencia
         },
         {
           headers: {
@@ -53,7 +58,7 @@ function TarefasAdmin() {
       cancelarEdicao();
       listarTarefas();
     } catch (err) {
-    console.error("Erro ao atualizar tarefa:", err);
+      console.error("Erro ao atualizar tarefa:", err);
     }
   };
 
@@ -64,12 +69,12 @@ function TarefasAdmin() {
     setDataEntrega("");
     setEquipeSelecionada("");
     setAlunoSelecionado("");
+    setTempoEstimado("");
+    setUrgencia("baixa");
     setAlunos([]);
   };
 
-
   const deletarTarefa = async (id) => {
-
     try {
       await axios.delete(`http://localhost:5000/api/tarefas/${id}`, {
         headers: {
@@ -137,24 +142,22 @@ function TarefasAdmin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  const hoje = new Date();
-  const dataSelecionada = new Date(dataEntrega);
+    const hoje = new Date();
+    const dataSelecionada = new Date(dataEntrega);
 
-  // Zera a hora para comparar apenas a data (sem hora)
-  hoje.setHours(0, 0, 0, 0);
-  dataSelecionada.setHours(0, 0, 0, 0);
+    hoje.setHours(0, 0, 0, 0);
+    dataSelecionada.setHours(0, 0, 0, 0);
 
-  if (dataSelecionada < hoje) {
-    setTipoMensagem("erro");
-    setMensagem("A data de entrega não pode ser anterior à data de hoje.");
-    setTimeout(() => setMensagem(""), 3000);
-    return;
-  }
+    if (dataSelecionada < hoje) {
+      setTipoMensagem("erro");
+      setMensagem("A data de entrega não pode ser anterior à data de hoje.");
+      setTimeout(() => setMensagem(""), 3000);
+      return;
+    }
 
     if(modoEdicao){
       await atualizarTarefa();
     }else{
-
       try {
         await axios.post(
           "http://localhost:5000/api/tarefas",
@@ -163,6 +166,8 @@ function TarefasAdmin() {
             dataEntrega,
             equipe: equipeSelecionada,
             aluno: alunoSelecionado,
+            tempoEstimado: parseInt(tempoEstimado) || null,
+            urgencia
           },
           {
             headers: {
@@ -174,15 +179,16 @@ function TarefasAdmin() {
         setDataEntrega("");
         setEquipeSelecionada("");
         setAlunoSelecionado("");
+        setTempoEstimado("");
+        setUrgencia("baixa");
         setAlunos([]);
-        listarTarefas(); // Atualiza a lista
+        listarTarefas();
 
         setTipoMensagem("sucesso");
         setMensagem("Tarefa criada com sucesso!");
         setTimeout(() => {
-        setMensagem("");
-        }, 3000); // some após 3 segundos
-
+          setMensagem("");
+        }, 3000);
       } catch (err) {
         console.error("Erro ao criar tarefa:", err);
       }
@@ -208,6 +214,24 @@ function TarefasAdmin() {
           onChange={(e) => setDataEntrega(e.target.value)}
           required
         />
+
+        <input
+          type="number"
+          placeholder="Tempo estimado (em minutos)"
+          value={tempoEstimado}
+          onChange={(e) => setTempoEstimado(e.target.value)}
+          min="0"
+        />
+
+        <select 
+          value={urgencia} 
+          onChange={(e) => setUrgencia(e.target.value)}
+          required
+        >
+          <option value="baixa">Urgência Baixa</option>
+          <option value="media">Urgência Média</option>
+          <option value="alta">Urgência Alta</option>
+        </select>
 
         <select value={equipeSelecionada} onChange={handleEquipeChange} required>
           <option value="">Selecione uma equipe</option>
@@ -236,7 +260,6 @@ function TarefasAdmin() {
           {modoEdicao ? "Salvar" : "Criar Tarefa"}
         </button>
 
-
         {mensagem && <div className={`mensagem ${tipoMensagem}`}>{mensagem}</div>}
       </form>
 
@@ -246,12 +269,19 @@ function TarefasAdmin() {
           <p>Nenhuma tarefa cadastrada.</p>
         ) : (
           tarefas.map((t) => (
-            <div key={t._id} className="tarefa-item">
+            <div key={t._id} className={`tarefa-item urgencia-${t.urgencia}`}>
               <p><strong>Descrição:</strong> {t.descricao}</p>
               <p><strong>Entrega:</strong> {new Date(t.dataEntrega).toLocaleDateString()}</p>
               <p><strong>Aluno:</strong> {t.aluno?.nome}</p>
               <p><strong>Equipe:</strong> {t.equipe?.nome}</p>
               <p><strong>Status:</strong> {t.status}</p>
+              <p><strong>Urgência:</strong> {t.urgencia.charAt(0).toUpperCase() + t.urgencia.slice(1)}</p>
+              {t.tempoEstimado && (
+                <p><strong>Tempo Estimado:</strong> {t.tempoEstimado} minutos</p>
+              )}
+              {t.tempoGasto > 0 && (
+                <p><strong>Tempo Gasto:</strong> {t.tempoGasto} minutos</p>
+              )}
               <div className="buttons">
                 <button className="edit-btn" onClick={() => iniciarEdicao(t)}>Editar</button>
                 <button className="delete-btn" onClick={() => deletarTarefa(t._id)}>Excluir</button>

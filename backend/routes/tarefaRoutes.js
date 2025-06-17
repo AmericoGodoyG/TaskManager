@@ -19,10 +19,13 @@ router.put('/:id', isAdmin, tarefaController.editarTarefa);
 // ADMIN: excluir tarefa
 router.delete('/:id', isAdmin, tarefaController.excluirTarefa);
 
-// ALUNO: ver suas tarefas
-router.get('/aluno/minhas', isAluno, tarefaController.minhasTarefas);
+// ALUNO: visualizar suas tarefas
+router.get('/minhas', isAluno, tarefaController.minhasTarefas);
 
-// ALUNO: atualizar status
-router.patch('/:id/status', isAluno, tarefaController.atualizarStatusAluno);
+// ALUNO: atualizar status da tarefa
+router.put('/:id/status', isAluno, tarefaController.atualizarStatusAluno);
+
+// ALUNO: controlar cronômetro
+router.put('/:id/cronometro', isAluno, tarefaController.controlarCronometro);
 
 module.exports = router;
