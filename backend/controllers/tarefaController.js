@@ -5,12 +5,19 @@ const Equipe = require('../models/Equipe');
 // ADMIN cria tarefa para aluno
 exports.criarTarefa = async (req, res) => {
   try {
-    const { descricao, dataEntrega, aluno, equipe } = req.body;
+    const { descricao, dataEntrega, aluno, equipe, tempoEstimado, urgencia } = req.body;
 
     const user = await User.findById(aluno);
     if (!user || user.tipo !== 'aluno') return res.status(400).json({ erro: 'Aluno inválido' });
 
-    const tarefa = new Tarefa({ descricao, dataEntrega, aluno, equipe });
+    const tarefa = new Tarefa({ 
+      descricao, 
+      dataEntrega, 
+      aluno, 
+      equipe,
+      tempoEstimado,
+      urgencia
+    });
     await tarefa.save();
 
     res.status(201).json(tarefa);
@@ -29,7 +36,8 @@ exports.listarTarefas = async (req, res) => {
 
     const tarefas = await Tarefa.find(filtro)
       .populate('aluno', 'nome')
-      .populate('equipe', 'nome');
+      .populate('equipe', 'nome')
+      .sort({ urgencia: -1, dataEntrega: 1 }); // Ordena por urgência (alta > média > baixa) e depois por data
     res.json(tarefas);
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao listar tarefas' });
@@ -39,10 +47,10 @@ exports.listarTarefas = async (req, res) => {
 // ADMIN: editar tarefa
 exports.editarTarefa = async (req, res) => {
   try {
-    const { descricao, dataEntrega, aluno, equipe } = req.body;
+    const { descricao, dataEntrega, aluno, equipe, tempoEstimado, urgencia } = req.body;
     const tarefaAtualizada = await Tarefa.findByIdAndUpdate(
       req.params.id,
-      { descricao, dataEntrega, aluno, equipe },
+      { descricao, dataEntrega, aluno, equipe, tempoEstimado, urgencia },
       { new: true }
     );
     res.json(tarefaAtualizada);
@@ -86,5 +94,44 @@ exports.atualizarStatusAluno = async (req, res) => {
     res.json({ msg: 'Status atualizado com sucesso', tarefa });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao atualizar status' });
+  }
+};
+
+// ALUNO: controlar cronômetro
+exports.controlarCronometro = async (req, res) => {
+  try {
+    const { acao } = req.body; // 'iniciar' ou 'pausar'
+    const tarefa = await Tarefa.findOne({ _id: req.params.id, aluno: req.user.id });
+
+    if (!tarefa) return res.status(403).json({ erro: 'Você não pode editar essa tarefa' });
+
+    if (acao === 'iniciar') {
+      if (tarefa.cronometroAtivo) {
+        return res.status(400).json({ erro: 'Cronômetro já está ativo' });
+      }
+      tarefa.cronometroAtivo = true;
+      tarefa.ultimaAtualizacaoCronometro = new Date();
+    } else if (acao === 'pausar') {
+      if (!tarefa.cronometroAtivo) {
+        return res.status(400).json({ erro: 'Cronômetro já está pausado' });
+      }
+      const tempoDecorrido = Math.floor((new Date() - tarefa.ultimaAtualizacaoCronometro) / 60000); // converte para minutos
+      tarefa.tempoGasto += tempoDecorrido;
+      tarefa.cronometroAtivo = false;
+
+      // Verifica se o tempo estimado foi excedido
+      if (tarefa.tempoEstimado && tarefa.tempoGasto > tarefa.tempoEstimado) {
+        tarefa.tempoExcedido = true;
+      }
+    }
+
+    await tarefa.save();
+    res.json({ 
+      msg: `Cronômetro ${acao}do com sucesso`, 
+      tarefa,
+      tempoExcedido: tarefa.tempoExcedido
+    });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao controlar cronômetro' });
   }
 };

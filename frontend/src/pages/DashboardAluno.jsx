@@ -2,42 +2,129 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { FaTasks, FaSignOutAlt } from 'react-icons/fa';
+import { FaTasks, FaSignOutAlt, FaFileDownload } from 'react-icons/fa';
 import "../styles/DashboardAluno.css";
 import "../styles/DashboardAdmin.css";
+import jsPDF from 'jspdf';
 
 function DashboardAluno() {
   const [tarefas, setTarefas] = useState([]);
   const [tarefaSelecionada, setTarefaSelecionada] = useState(null);
   const [statusAtualizado, setStatusAtualizado] = useState("");
   const [alunoNome, setAlunoNome] = useState("");
+  const [cronometrosAtivos, setCronometrosAtivos] = useState({});
 
-    useEffect(() => {
-        const nomeSalvo = localStorage.getItem("nome");
-        if (nomeSalvo) setAlunoNome(nomeSalvo);
-        buscarMinhasTarefas();
-    }, []);
+  useEffect(() => {
+    buscarTarefas();
+    buscarNomeAluno();
+  }, []);
 
-    const navigate = useNavigate();
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const agora = new Date();
+      const novosCronometros = { ...cronometrosAtivos };
+      let atualizou = false;
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("nome");
-        navigate("/");
-    };
+      tarefas.forEach(tarefa => {
+        if (tarefa.cronometroAtivo) {
+          const tempoDecorrido = Math.floor((agora - new Date(tarefa.ultimaAtualizacaoCronometro)) / 60000);
+          novosCronometros[tarefa._id] = (tarefa.tempoGasto || 0) + tempoDecorrido;
+          atualizou = true;
+        }
+      });
 
-  const buscarMinhasTarefas = async () => {
+      if (atualizou) {
+        setCronometrosAtivos(novosCronometros);
+      }
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [tarefas, cronometrosAtivos]);
+
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("nome");
+    navigate("/");
+  };
+
+  const buscarTarefas = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/tarefas/aluno/minhas", {
+      const res = await axios.get("http://localhost:5000/api/tarefas/minhas", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       setTarefas(res.data);
-      setAlunoNome(localStorage.getItem("nome"));
+      
+      const cronometros = {};
+      res.data.forEach(tarefa => {
+        if (tarefa.cronometroAtivo) {
+          const tempoDecorrido = Math.floor((new Date() - new Date(tarefa.ultimaAtualizacaoCronometro)) / 60000);
+          cronometros[tarefa._id] = (tarefa.tempoGasto || 0) + tempoDecorrido;
+        }
+      });
+      setCronometrosAtivos(cronometros);
     } catch (err) {
-      console.error("Erro ao buscar tarefas do aluno:", err);
+      console.error("Erro ao buscar tarefas:", err);
     }
+  };
+
+  const buscarNomeAluno = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/alunos/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setAlunoNome(res.data.nome);
+    } catch (err) {
+      console.error("Erro ao buscar nome do aluno:", err);
+    }
+  };
+
+  const controlarCronometro = async (tarefaId, acao) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/tarefas/${tarefaId}/cronometro`,
+        { acao },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const tarefasAtualizadas = tarefas.map(t => {
+        if (t._id === tarefaId) {
+          return res.data.tarefa;
+        }
+        return t;
+      });
+      setTarefas(tarefasAtualizadas);
+
+      if (acao === 'iniciar') {
+        setCronometrosAtivos(prev => ({
+          ...prev,
+          [tarefaId]: res.data.tarefa.tempoGasto
+        }));
+      } else {
+        setCronometrosAtivos(prev => {
+          const novos = { ...prev };
+          delete novos[tarefaId];
+          return novos;
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao controlar cronômetro:", err);
+    }
+  };
+
+  const formatarTempo = (minutos) => {
+    const horas = Math.floor(minutos / 60);
+    const mins = minutos % 60;
+    return `${horas}h ${mins}m`;
   };
 
   const abrirTarefa = (tarefa) => {
@@ -56,11 +143,48 @@ function DashboardAluno() {
           },
         }
       );
-      buscarMinhasTarefas();
+      buscarTarefas();
       setTarefaSelecionada(null);
     } catch (err) {
       console.error("Erro ao atualizar status:", err);
     }
+  };
+
+  const fecharTarefa = () => {
+    setTarefaSelecionada(null);
+  };
+
+  const gerarPDF = (tarefa) => {
+    const doc = new jsPDF();
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Detalhes da Tarefa", 105, 20, { align: "center" });
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    const yInicial = 40;
+    const espacoEntreLinhas = 10;
+    
+    doc.text(`Descrição: ${tarefa.descricao}`, 20, yInicial);
+    doc.text(`Data de Entrega: ${new Date(tarefa.dataEntrega).toLocaleDateString()}`, 20, yInicial + espacoEntreLinhas);
+    doc.text(`Equipe: ${tarefa.equipe?.nome}`, 20, yInicial + (espacoEntreLinhas * 2));
+    doc.text(`Status: ${tarefa.status}`, 20, yInicial + (espacoEntreLinhas * 3));
+    
+    if (tarefa.tempoEstimado) {
+      doc.text(`Tempo Estimado: ${formatarTempo(tarefa.tempoEstimado)}`, 20, yInicial + (espacoEntreLinhas * 4));
+    }
+    
+    if (tarefa.tempoGasto > 0) {
+      doc.text(`Tempo Gasto: ${formatarTempo(tarefa.tempoGasto)}`, 20, yInicial + (espacoEntreLinhas * 5));
+    }
+    
+    const dataAtual = new Date().toLocaleString();
+    doc.setFontSize(10);
+    doc.text(`PDF gerado em: ${dataAtual}`, 20, 280);
+    
+    doc.save(`tarefa_${tarefa._id}.pdf`);
   };
 
   return (
@@ -97,33 +221,51 @@ function DashboardAluno() {
               <p><strong>Descrição:</strong> {tarefa.descricao}</p>
               <p><strong>Data de Entrega:</strong> {new Date(tarefa.dataEntrega).toLocaleDateString()}</p>
               <p><strong>Status:</strong> {tarefa.status}</p>
-              <button onClick={() => abrirTarefa(tarefa)}>Ver Tarefa</button>
+              {tarefa.tempoEstimado && (
+                <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefa.tempoEstimado)}</p>
+              )}
+              {tarefa.cronometroAtivo ? (
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(cronometrosAtivos[tarefa._id] || tarefa.tempoGasto)}</p>
+              ) : tarefa.tempoGasto > 0 && (
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(tarefa.tempoGasto)}</p>
+              )}
+              <div className="tarefa-actions">
+                <button onClick={() => abrirTarefa(tarefa)}>Ver Detalhes</button>
+                {tarefa.tempoEstimado && (
+                  <button 
+                    onClick={() => controlarCronometro(tarefa._id, tarefa.cronometroAtivo ? 'pausar' : 'iniciar')}
+                    className={tarefa.cronometroAtivo ? 'pause-btn' : 'start-btn'}
+                  >
+                    {tarefa.cronometroAtivo ? 'Pausar' : 'Iniciar'} Cronômetro
+                  </button>
+                )}
+              </div>
             </div>
           ))
         )}
 
         {tarefaSelecionada && (
           <div className="modal-tarefa">
-            <h3>Detalhes da Tarefa</h3>
-            <p><strong>Descrição:</strong> {tarefaSelecionada.descricao}</p>
-            <p><strong>Entrega:</strong> {new Date(tarefaSelecionada.dataEntrega).toLocaleDateString()}</p>
-            <p><strong>Equipe:</strong> {tarefaSelecionada.equipe?.nome}</p>
-            <p><strong>Status Atual:</strong> {tarefaSelecionada.status}</p>
-
-            <label htmlFor="status">Alterar Status:</label>
-            <select
-              id="status"
-              value={statusAtualizado}
-              onChange={(e) => setStatusAtualizado(e.target.value)}
-            >
-              <option value="pendente">Pendente</option>
-              <option value="em andamento">Em andamento</option>
-              <option value="concluído">concluído</option>
-            </select>
-
-            <div className="botoes-modal">
-              <button onClick={atualizarStatus}>Salvar</button>
-              <button onClick={() => setTarefaSelecionada(null)}>Fechar</button>
+            <div className="modal-content">
+              <h3>Detalhes da Tarefa</h3>
+              <p><strong>Descrição:</strong> {tarefaSelecionada.descricao}</p>
+              <p><strong>Entrega:</strong> {new Date(tarefaSelecionada.dataEntrega).toLocaleDateString()}</p>
+              <p><strong>Equipe:</strong> {tarefaSelecionada.equipe?.nome}</p>
+              <p><strong>Status Atual:</strong> {tarefaSelecionada.status}</p>
+              {tarefaSelecionada.tempoEstimado && (
+                <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefaSelecionada.tempoEstimado)}</p>
+              )}
+              {tarefaSelecionada.cronometroAtivo ? (
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(cronometrosAtivos[tarefaSelecionada._id] || tarefaSelecionada.tempoGasto)}</p>
+              ) : tarefaSelecionada.tempoGasto > 0 && (
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(tarefaSelecionada.tempoGasto)}</p>
+              )}
+              <div className="modal-buttons">
+                <button onClick={() => gerarPDF(tarefaSelecionada)} className="download-btn">
+                  <FaFileDownload /> Baixar PDF
+                </button>
+                <button onClick={fecharTarefa}>Fechar</button>
+              </div>
             </div>
           </div>
         )}

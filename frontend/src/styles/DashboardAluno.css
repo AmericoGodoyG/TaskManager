@@ -1,6 +1,6 @@
 .dashboard-aluno {
   flex: 1;
-  padding: 30px;
+  padding: 20px;
   margin-left: 250px; /* Adiciona margem igual à largura do sidebar */
   width: calc(100% - 250px); /* Ajusta a largura considerando o sidebar */
   background-color: #f9f9f9;
@@ -15,11 +15,11 @@
 
 /* Estilo dos cards de tarefas */
 .tarefa-card {
-  background: white;
+  background-color: #fff;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
 }
 
@@ -34,83 +34,98 @@
 
 .tarefa-card p {
   margin: 8px 0;
-  color: #34495e;
 }
 
-.tarefa-card button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 10px;
-}
-
-.tarefa-card button:hover {
-  background-color: #0056b3;
-}
-
-/* Modal de tarefa */
-.modal-tarefa {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-top: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.modal-tarefa h3 {
-  margin: 0 0 15px 0;
-  color: #2c3e50;
-}
-
-.modal-tarefa label {
-  display: block;
-  margin: 10px 0 5px;
-  color: #2c3e50;
-}
-
-.modal-tarefa select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 15px;
-}
-
-/* Botões do modal */
-.botoes-modal {
+.tarefa-actions {
   display: flex;
   gap: 10px;
   margin-top: 15px;
 }
 
-.botoes-modal button {
+.tarefa-actions button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
-.botoes-modal button:first-child {
-  background-color: #28a745;
+.tarefa-actions button:first-child {
+  background-color: #007bff;
   color: white;
 }
 
-.botoes-modal button:first-child:hover {
-  background-color: #218838;
+.tarefa-actions button:first-child:hover {
+  background-color: #0056b3;
 }
 
-.botoes-modal button:last-child {
-  background-color: #dc3545;
+.start-btn {
+  background-color: #28a745 !important;
+  color: white !important;
+}
+
+.start-btn:hover {
+  background-color: #218838 !important;
+}
+
+.pause-btn {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.pause-btn:hover {
+  background-color: #e0a800 !important;
+}
+
+/* Modal de tarefa */
+.modal-tarefa {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.modal-content p {
+  margin: 10px 0;
+}
+
+.modal-content button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
   color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
-.botoes-modal button:last-child:hover {
-  background-color: #c82333;
+.modal-content button:hover {
+  background-color: #0056b3;
 }
 
 /* Animação opcional */
@@ -181,9 +196,8 @@
 }
 
 .boas-vindas {
-  margin-bottom: 2rem;
-  color: #2c3e50;
-  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 /* Responsividade */
@@ -193,6 +207,42 @@
     width: 100%;
     padding: 15px;
   }
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-buttons button:last-child {
+  background-color: #007bff;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background-color: #0056b3;
+}
+
+.download-btn {
+  background-color: #28a745 !important;
+  color: white !important;
+}
+
+.download-btn:hover {
+  background-color: #218838 !important;
 }
 
 
