@@ -4,6 +4,7 @@ import "../styles/TarefasAdmin.css";
 
 function TarefasAdmin() {
   const [descricao, setDescricao] = useState("");
+  const [detalhes, setDetalhes] = useState("");
   const [dataEntrega, setDataEntrega] = useState("");
   const [equipes, setEquipes] = useState([]);
   const [alunos, setAlunos] = useState([]);
@@ -26,6 +27,7 @@ function TarefasAdmin() {
     setModoEdicao(true);
     setIdTarefaEditando(tarefa._id);
     setDescricao(tarefa.descricao);
+    setDetalhes(tarefa.detalhes || "");
     setDataEntrega(tarefa.dataEntrega.split("T")[0]);
     setEquipeSelecionada(tarefa.equipe?._id);
     setTempoEstimado(tarefa.tempoEstimado || "");
@@ -40,6 +42,7 @@ function TarefasAdmin() {
         `http://localhost:5000/api/tarefas/${idTarefaEditando}`,
         {
           descricao,
+          detalhes,
           dataEntrega,
           equipe: equipeSelecionada,
           aluno: alunoSelecionado,
@@ -66,6 +69,7 @@ function TarefasAdmin() {
     setModoEdicao(false);
     setIdTarefaEditando(null);
     setDescricao("");
+    setDetalhes("");
     setDataEntrega("");
     setEquipeSelecionada("");
     setAlunoSelecionado("");
@@ -163,6 +167,7 @@ function TarefasAdmin() {
           "http://localhost:5000/api/tarefas",
           {
             descricao,
+            detalhes,
             dataEntrega,
             equipe: equipeSelecionada,
             aluno: alunoSelecionado,
@@ -176,6 +181,7 @@ function TarefasAdmin() {
           }
         );
         setDescricao("");
+        setDetalhes("");
         setDataEntrega("");
         setEquipeSelecionada("");
         setAlunoSelecionado("");
@@ -202,10 +208,17 @@ function TarefasAdmin() {
       <form className="form-tarefa" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Descrição"
+          placeholder="Nome da tarefa"
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
           required
+        />
+        <textarea
+          placeholder="Descrição detalhada da tarefa"
+          value={detalhes}
+          onChange={e => setDetalhes(e.target.value)}
+          rows={3}
+          style={{resize: 'vertical'}}
         />
 
         <input
@@ -270,7 +283,8 @@ function TarefasAdmin() {
         ) : (
           tarefas.map((t) => (
             <div key={t._id} className={`tarefa-item urgencia-${t.urgencia}`}>
-              <p><strong>Descrição:</strong> {t.descricao}</p>
+              <p><strong>Nome da tarefa:</strong> {t.descricao}</p>
+              {t.detalhes && <p><strong>Descrição:</strong> {t.detalhes}</p>}
               <p><strong>Entrega:</strong> {new Date(t.dataEntrega).toLocaleDateString()}</p>
               <p><strong>Aluno:</strong> {t.aluno?.nome}</p>
               <p><strong>Equipe:</strong> {t.equipe?.nome}</p>

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const tarefaSchema = new mongoose.Schema({
   descricao: { type: String, required: true },
+  detalhes: { type: String }, // descrição detalhada
   dataEntrega: { type: Date, required: true },
   status: {
     type: String,
