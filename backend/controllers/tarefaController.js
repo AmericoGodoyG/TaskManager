@@ -5,13 +5,14 @@ const Equipe = require('../models/Equipe');
 // ADMIN cria tarefa para aluno
 exports.criarTarefa = async (req, res) => {
   try {
-    const { descricao, dataEntrega, aluno, equipe, tempoEstimado, urgencia } = req.body;
+    const { descricao, detalhes, dataEntrega, aluno, equipe, tempoEstimado, urgencia } = req.body;
 
     const user = await User.findById(aluno);
     if (!user || user.tipo !== 'aluno') return res.status(400).json({ erro: 'Aluno inválido' });
 
     const tarefa = new Tarefa({ 
       descricao, 
+      detalhes,
       dataEntrega, 
       aluno, 
       equipe,
@@ -47,10 +48,10 @@ exports.listarTarefas = async (req, res) => {
 // ADMIN: editar tarefa
 exports.editarTarefa = async (req, res) => {
   try {
-    const { descricao, dataEntrega, aluno, equipe, tempoEstimado, urgencia } = req.body;
+    const { descricao, detalhes, dataEntrega, aluno, equipe, tempoEstimado, urgencia } = req.body;
     const tarefaAtualizada = await Tarefa.findByIdAndUpdate(
       req.params.id,
-      { descricao, dataEntrega, aluno, equipe, tempoEstimado, urgencia },
+      { descricao, detalhes, dataEntrega, aluno, equipe, tempoEstimado, urgencia },
       { new: true }
     );
     res.json(tarefaAtualizada);

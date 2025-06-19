@@ -48,7 +48,27 @@
 }
 
 .form-tarefa button:hover {
-  background-color: #218838;
+  background-color: #000000;
+}
+
+.form-tarefa textarea {
+  padding: 12px;
+  border: 1.5px solid #bfc9d1;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-height: 80px;
+  resize: vertical;
+  background-color: #f7fafd;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  color: #222;
+}
+
+.form-tarefa textarea:focus {
+  border-color: #000000;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(40,167,69,0.12);
+  background-color: #fff;
 }
 
 .lista-tarefas {

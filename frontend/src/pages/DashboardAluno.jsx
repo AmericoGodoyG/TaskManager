@@ -27,8 +27,8 @@ function DashboardAluno() {
 
       tarefas.forEach(tarefa => {
         if (tarefa.cronometroAtivo) {
-          const tempoDecorrido = Math.floor((agora - new Date(tarefa.ultimaAtualizacaoCronometro)) / 60000);
-          novosCronometros[tarefa._id] = (tarefa.tempoGasto || 0) + tempoDecorrido;
+          const tempoDecorridoSegundos = Math.floor((agora - new Date(tarefa.ultimaAtualizacaoCronometro)) / 1000);
+          novosCronometros[tarefa._id] = (tarefa.tempoGasto ? tarefa.tempoGasto * 60 : 0) + tempoDecorridoSegundos;
           atualizou = true;
         }
       });
@@ -36,7 +36,7 @@ function DashboardAluno() {
       if (atualizou) {
         setCronometrosAtivos(novosCronometros);
       }
-    }, 60000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [tarefas, cronometrosAtivos]);
@@ -61,8 +61,8 @@ function DashboardAluno() {
       const cronometros = {};
       res.data.forEach(tarefa => {
         if (tarefa.cronometroAtivo) {
-          const tempoDecorrido = Math.floor((new Date() - new Date(tarefa.ultimaAtualizacaoCronometro)) / 60000);
-          cronometros[tarefa._id] = (tarefa.tempoGasto || 0) + tempoDecorrido;
+          const tempoDecorridoSegundos = Math.floor((new Date() - new Date(tarefa.ultimaAtualizacaoCronometro)) / 1000);
+          cronometros[tarefa._id] = (tarefa.tempoGasto ? tarefa.tempoGasto * 60 : 0) + tempoDecorridoSegundos;
         }
       });
       setCronometrosAtivos(cronometros);
@@ -107,7 +107,7 @@ function DashboardAluno() {
       if (acao === 'iniciar') {
         setCronometrosAtivos(prev => ({
           ...prev,
-          [tarefaId]: res.data.tarefa.tempoGasto
+          [tarefaId]: res.data.tarefa.tempoGasto ? res.data.tarefa.tempoGasto * 60 : 0
         }));
       } else {
         setCronometrosAtivos(prev => {
@@ -121,10 +121,12 @@ function DashboardAluno() {
     }
   };
 
-  const formatarTempo = (minutos) => {
-    const horas = Math.floor(minutos / 60);
-    const mins = minutos % 60;
-    return `${horas}h ${mins}m`;
+  const formatarTempo = (segundos) => {
+    if (segundos == null) return '0h 0m 0s';
+    const horas = Math.floor(segundos / 3600);
+    const mins = Math.floor((segundos % 3600) / 60);
+    const secs = segundos % 60;
+    return `${horas}h ${mins}m ${secs}s`;
   };
 
   const abrirTarefa = (tarefa) => {
@@ -167,17 +169,21 @@ function DashboardAluno() {
     const yInicial = 40;
     const espacoEntreLinhas = 10;
     
-    doc.text(`Descrição: ${tarefa.descricao}`, 20, yInicial);
-    doc.text(`Data de Entrega: ${new Date(tarefa.dataEntrega).toLocaleDateString()}`, 20, yInicial + espacoEntreLinhas);
-    doc.text(`Equipe: ${tarefa.equipe?.nome}`, 20, yInicial + (espacoEntreLinhas * 2));
-    doc.text(`Status: ${tarefa.status}`, 20, yInicial + (espacoEntreLinhas * 3));
+    doc.text(`Nome da tarefa: ${tarefa.descricao}`, 20, yInicial);
+    if (tarefa.detalhes) {
+      doc.text(`Descrição: ${tarefa.detalhes}`, 20, yInicial + espacoEntreLinhas);
+    }
+    let linhaAtual = yInicial + espacoEntreLinhas * (tarefa.detalhes ? 2 : 1);
+    doc.text(`Data de Entrega: ${new Date(tarefa.dataEntrega).toLocaleDateString()}`, 20, linhaAtual);
+    doc.text(`Equipe: ${tarefa.equipe?.nome}`, 20, linhaAtual + espacoEntreLinhas);
+    doc.text(`Status: ${tarefa.status}`, 20, linhaAtual + (espacoEntreLinhas * 2));
     
     if (tarefa.tempoEstimado) {
-      doc.text(`Tempo Estimado: ${formatarTempo(tarefa.tempoEstimado)}`, 20, yInicial + (espacoEntreLinhas * 4));
+      doc.text(`Tempo Estimado: ${formatarTempo(tarefa.tempoEstimado * 60)}`, 20, linhaAtual + (espacoEntreLinhas * 3));
     }
     
     if (tarefa.tempoGasto > 0) {
-      doc.text(`Tempo Gasto: ${formatarTempo(tarefa.tempoGasto)}`, 20, yInicial + (espacoEntreLinhas * 5));
+      doc.text(`Tempo Gasto: ${formatarTempo(tarefa.tempoGasto * 60)}`, 20, linhaAtual + (espacoEntreLinhas * 4));
     }
     
     const dataAtual = new Date().toLocaleString();
@@ -218,16 +224,17 @@ function DashboardAluno() {
         ) : (
           tarefas.map((tarefa) => (
             <div key={tarefa._id} className="tarefa-card">
-              <p><strong>Descrição:</strong> {tarefa.descricao}</p>
+              <p><strong>Nome da tarefa:</strong> {tarefa.descricao}</p>
+              {tarefa.detalhes && <p><strong>Descrição:</strong> {tarefa.detalhes}</p>}
               <p><strong>Data de Entrega:</strong> {new Date(tarefa.dataEntrega).toLocaleDateString()}</p>
               <p><strong>Status:</strong> {tarefa.status}</p>
               {tarefa.tempoEstimado && (
-                <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefa.tempoEstimado)}</p>
+                <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefa.tempoEstimado * 60)}</p>
               )}
               {tarefa.cronometroAtivo ? (
-                <p><strong>Tempo Gasto:</strong> {formatarTempo(cronometrosAtivos[tarefa._id] || tarefa.tempoGasto)}</p>
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(cronometrosAtivos[tarefa._id] || (tarefa.tempoGasto ? tarefa.tempoGasto * 60 : 0))}</p>
               ) : tarefa.tempoGasto > 0 && (
-                <p><strong>Tempo Gasto:</strong> {formatarTempo(tarefa.tempoGasto)}</p>
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(tarefa.tempoGasto * 60)}</p>
               )}
               <div className="tarefa-actions">
                 <button onClick={() => abrirTarefa(tarefa)}>Ver Detalhes</button>
@@ -248,17 +255,18 @@ function DashboardAluno() {
           <div className="modal-tarefa">
             <div className="modal-content">
               <h3>Detalhes da Tarefa</h3>
-              <p><strong>Descrição:</strong> {tarefaSelecionada.descricao}</p>
+              <p><strong>Nome da tarefa:</strong> {tarefaSelecionada.descricao}</p>
+              {tarefaSelecionada.detalhes && <p><strong>Descrição:</strong> {tarefaSelecionada.detalhes}</p>}
               <p><strong>Entrega:</strong> {new Date(tarefaSelecionada.dataEntrega).toLocaleDateString()}</p>
               <p><strong>Equipe:</strong> {tarefaSelecionada.equipe?.nome}</p>
               <p><strong>Status Atual:</strong> {tarefaSelecionada.status}</p>
               {tarefaSelecionada.tempoEstimado && (
-                <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefaSelecionada.tempoEstimado)}</p>
+                <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefaSelecionada.tempoEstimado * 60)}</p>
               )}
               {tarefaSelecionada.cronometroAtivo ? (
-                <p><strong>Tempo Gasto:</strong> {formatarTempo(cronometrosAtivos[tarefaSelecionada._id] || tarefaSelecionada.tempoGasto)}</p>
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(cronometrosAtivos[tarefaSelecionada._id] || (tarefaSelecionada.tempoGasto ? tarefaSelecionada.tempoGasto * 60 : 0))}</p>
               ) : tarefaSelecionada.tempoGasto > 0 && (
-                <p><strong>Tempo Gasto:</strong> {formatarTempo(tarefaSelecionada.tempoGasto)}</p>
+                <p><strong>Tempo Gasto:</strong> {formatarTempo(tarefaSelecionada.tempoGasto * 60)}</p>
               )}
               <div className="modal-buttons">
                 <button onClick={() => gerarPDF(tarefaSelecionada)} className="download-btn">
