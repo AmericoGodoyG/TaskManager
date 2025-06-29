@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../styles/DashboardAdmin.css";
 import "../styles/Equipes.css";
+import { FaChartPie, FaUsers, FaTasks, FaSignOutAlt } from 'react-icons/fa';
 
 export default function Equipes() {
   const [equipes, setEquipes] = useState([]);
@@ -12,8 +14,15 @@ export default function Equipes() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
   const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
 
   useEffect(() => {
     carregarEquipes();
@@ -108,69 +117,113 @@ export default function Equipes() {
   };
 
   return (
-    <div className="container">
-      <h2 className="title">Gerenciar Equipes</h2>
+    <div className="admin-page">
+      <aside className="sidebar">
+        <nav>
+          <ul>
+            <li className="menu-title">Dashboard</li>
+            <li>
+              <Link to="/admin/geral" className={location.pathname === '/admin/geral' ? 'active' : ''}>
+                <span><FaChartPie /> Geral</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/admin" className={location.pathname === '/admin' ? 'active' : ''}>
+                <span><FaUsers /> Equipes</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/admin/tarefas" className={location.pathname === '/admin/tarefas' ? 'active' : ''}>
+                <span><FaTasks /> Tarefas</span>
+              </Link>
+            </li>
+          </ul>
+          <ul className="sidebar-bottom">
+            <li>
+              <button onClick={logout} className="logout-button">
+                <span><FaSignOutAlt /> Sair</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
-      <form onSubmit={criarOuEditarEquipe} className="form">
-        <input
-          type="text"
-          className="input"
-          placeholder="Nome da equipe"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          required
-        />
-
-        <label className="label">Selecionar membros:</label>
-        <div className="checkbox-list">
-          {alunos
-            .filter((aluno) => aluno.tipo !== "admin")
-            .map((aluno) => (
-              <label key={aluno._id} className="checkbox-item">
-                <input
-                  type="checkbox"
-                  checked={membros.includes(aluno._id)}
-                  onChange={() => {
-                    if (membros.includes(aluno._id)) {
-                      setMembros(membros.filter((id) => id !== aluno._id));
-                    } else {
-                      setMembros([...membros, aluno._id]);
-                    }
-                  }}
-                />
-                {aluno.nome} ({aluno.email})
-              </label>
-            ))}
+      <main className="dashboard-container">
+        <div className="dashboard-header">
+          <h2 className="dashboard-title">
+            {location.pathname === '/admin/criar-equipe' ? 'Criar Nova Equipe' : 
+             location.pathname.includes('/admin/equipe/') ? 'Editar Equipe' : 
+             'Gerenciar Equipes'}
+          </h2>
+          {location.pathname !== '/admin' && (
+            <Link to="/admin" className="btn-back">
+              ← Voltar ao Dashboard
+            </Link>
+          )}
         </div>
 
+        <form onSubmit={criarOuEditarEquipe} className="form">
+          <input
+            type="text"
+            className="input"
+            placeholder="Nome da equipe"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+          />
 
-        <button type="submit" className="btn">
-          {editandoId ? "Salvar" : "Criar"}
-        </button>
-      </form>
-
-      {mensagemSucesso && <p className="success-message">{mensagemSucesso}</p>}
-      {mensagemErro && <p className="error-message">{mensagemErro}</p>}
-
-      <div className="equipes-list">
-        {equipes.map((equipe) => (
-          <div className="equipe-card" key={equipe._id}>
-            <h3>{equipe.nome}</h3>
-            <p>Membros: {equipe.membros.map((m) => m.nome).join(", ")}</p>
-            <div className="buttons">
-              <button className="edit-btn" onClick={() => editarEquipe(equipe)}>
-                Editar
-              </button>
-              <button
-                className="delete-btn"
-                onClick={() => excluirEquipe(equipe._id)}
-              >
-                Excluir
-              </button>
-            </div>
+          <label className="label">Selecionar membros:</label>
+          <div className="checkbox-list">
+            {alunos
+              .filter((aluno) => aluno.tipo !== "admin")
+              .map((aluno) => (
+                <label key={aluno._id} className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={membros.includes(aluno._id)}
+                    onChange={() => {
+                      if (membros.includes(aluno._id)) {
+                        setMembros(membros.filter((id) => id !== aluno._id));
+                      } else {
+                        setMembros([...membros, aluno._id]);
+                      }
+                    }}
+                  />
+                  {aluno.nome} ({aluno.email})
+                </label>
+              ))}
           </div>
-        ))}
-      </div>
+
+          <button type="submit" className="btn">
+            {editandoId ? "Salvar Alterações" : "Criar Equipe"}
+          </button>
+        </form>
+
+        {mensagemSucesso && <p className="success-message">{mensagemSucesso}</p>}
+        {mensagemErro && <p className="error-message">{mensagemErro}</p>}
+
+        {location.pathname === '/admin' && (
+          <div className="equipes-list">
+            {equipes.map((equipe) => (
+              <div className="equipe-card" key={equipe._id}>
+                <h3>{equipe.nome}</h3>
+                <p>Membros: {equipe.membros.map((m) => m.nome).join(", ")}</p>
+                <div className="buttons">
+                  <button className="edit-btn" onClick={() => editarEquipe(equipe)}>
+                    Editar
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => excluirEquipe(equipe._id)}
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

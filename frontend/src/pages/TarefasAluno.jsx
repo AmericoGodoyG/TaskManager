@@ -86,6 +86,23 @@ const TarefasAluno = () => {
     }
   };
 
+  const atualizarStatusTarefa = async (id, novoStatus) => {
+  try {
+    await axios.put(`http://localhost:5000/api/tarefas/${id}/status`, {
+      status: novoStatus
+    }, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}` // apenas se você estiver usando JWT
+      }
+    });
+
+    carregarTarefas();
+    setMensagem('Status atualizado com sucesso');
+  } catch (err) {
+    setMensagem('Erro ao atualizar status');
+  }
+};
+
   return (
     <div className="tarefas-container">
       <h2>Minhas Tarefas</h2>
@@ -98,7 +115,17 @@ const TarefasAluno = () => {
             <p><strong>Descrição:</strong> {tarefa.descricao}</p>
             <p><strong>Prazo:</strong> {new Date(tarefa.prazo).toLocaleDateString()}</p>
             <p><strong>Urgência:</strong> {tarefa.urgencia.charAt(0).toUpperCase() + tarefa.urgencia.slice(1)}</p>
-            <p><strong>Status:</strong> {tarefa.status}</p>
+              <div className="status-select">
+                <strong>Status:</strong>{' '}
+                <select
+                  value={tarefa.status}
+                  onChange={(e) => atualizarStatusTarefa(tarefa._id, e.target.value)}
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="em_andamento">Em andamento</option>
+                  <option value="concluido">Concluído</option>
+                </select>
+              </div>
             {tarefa.tempoEstimado && (
               <p><strong>Tempo Estimado:</strong> {tarefa.tempoEstimado} minutos</p>
             )}

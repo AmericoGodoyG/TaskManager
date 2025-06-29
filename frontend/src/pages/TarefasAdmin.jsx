@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import "../styles/DashboardAdmin.css";
 import "../styles/TarefasAdmin.css";
+import { FaChartPie, FaUsers, FaTasks, FaSignOutAlt } from 'react-icons/fa';
 
 function TarefasAdmin() {
   const [descricao, setDescricao] = useState("");
@@ -17,11 +20,18 @@ function TarefasAdmin() {
   const [idTarefaEditando, setIdTarefaEditando] = useState(null);
   const [tempoEstimado, setTempoEstimado] = useState("");
   const [urgencia, setUrgencia] = useState("baixa");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     buscarEquipes();
     listarTarefas();
   }, []);
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
 
   const iniciarEdicao = (tarefa) => {
     setModoEdicao(true);
@@ -202,108 +212,149 @@ function TarefasAdmin() {
   };
 
   return (
-    <div className="tarefas-admin">
-      <h2>Gerenciar Tarefas</h2>
+    <div className="admin-page">
+      <aside className="sidebar">
+        <nav>
+          <ul>
+            <li className="menu-title">Dashboard</li>
+            <li>
+              <Link to="/admin/geral" className={location.pathname === '/admin/geral' ? 'active' : ''}>
+                <span><FaChartPie /> Geral</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/admin" className={location.pathname === '/admin' ? 'active' : ''}>
+                <span><FaUsers /> Equipes</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/admin/tarefas" className={location.pathname === '/admin/tarefas' ? 'active' : ''}>
+                <span><FaTasks /> Tarefas</span>
+              </Link>
+            </li>
+          </ul>
+          <ul className="sidebar-bottom">
+            <li>
+              <button onClick={logout} className="logout-button">
+                <span><FaSignOutAlt /> Sair</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
-      <form className="form-tarefa" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Nome da tarefa"
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-          required
-        />
-        <textarea
-          placeholder="Descrição detalhada da tarefa"
-          value={detalhes}
-          onChange={e => setDetalhes(e.target.value)}
-          rows={3}
-          style={{resize: 'vertical'}}
-        />
+      <main className="dashboard-container">
+        <div className="dashboard-header">
+          <h2 className="dashboard-title">
+            {location.pathname === '/admin/criar-tarefa' ? 'Criar Nova Tarefa' : 
+             location.pathname.includes('/admin/editar-tarefa/') ? 'Editar Tarefa' : 
+             'Gerenciar Tarefas'}
+          </h2>
+          <Link to="/admin/tarefas" className="btn-back">
+            ← Voltar ao Dashboard de Tarefas
+          </Link>
+        </div>
 
-        <input
-          type="date"
-          value={dataEntrega}
-          onChange={(e) => setDataEntrega(e.target.value)}
-          required
-        />
+        <form className="form-tarefa" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Nome da tarefa"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            required
+          />
+          <textarea
+            placeholder="Descrição detalhada da tarefa"
+            value={detalhes}
+            onChange={e => setDetalhes(e.target.value)}
+            rows={3}
+            style={{resize: 'vertical'}}
+          />
 
-        <input
-          type="number"
-          placeholder="Tempo estimado (em minutos)"
-          value={tempoEstimado}
-          onChange={(e) => setTempoEstimado(e.target.value)}
-          min="0"
-        />
+          <input
+            type="date"
+            value={dataEntrega}
+            onChange={(e) => setDataEntrega(e.target.value)}
+            required
+          />
 
-        <select 
-          value={urgencia} 
-          onChange={(e) => setUrgencia(e.target.value)}
-          required
-        >
-          <option value="baixa">Urgência Baixa</option>
-          <option value="media">Urgência Média</option>
-          <option value="alta">Urgência Alta</option>
-        </select>
+          <input
+            type="number"
+            placeholder="Tempo estimado (em minutos)"
+            value={tempoEstimado}
+            onChange={(e) => setTempoEstimado(e.target.value)}
+            min="0"
+          />
 
-        <select value={equipeSelecionada} onChange={handleEquipeChange} required>
-          <option value="">Selecione uma equipe</option>
-          {equipes.map((e) => (
-            <option key={e._id} value={e._id}>
-              {e.nome}
-            </option>
-          ))}
-        </select>
+          <select 
+            value={urgencia} 
+            onChange={(e) => setUrgencia(e.target.value)}
+            required
+          >
+            <option value="baixa">Urgência Baixa</option>
+            <option value="media">Urgência Média</option>
+            <option value="alta">Urgência Alta</option>
+          </select>
 
-        <select
-          value={alunoSelecionado}
-          onChange={(e) => setAlunoSelecionado(e.target.value)}
-          required
-          disabled={!equipeSelecionada}
-        >
-          <option value="">Selecione um aluno</option>
-          {alunos.map((a) => (
-            <option key={a._id} value={a._id}>
-              {a.nome}
-            </option>
-          ))}
-        </select>
+          <select value={equipeSelecionada} onChange={handleEquipeChange} required>
+            <option value="">Selecione uma equipe</option>
+            {equipes.map((e) => (
+              <option key={e._id} value={e._id}>
+                {e.nome}
+              </option>
+            ))}
+          </select>
 
-        <button type="submit">
-          {modoEdicao ? "Salvar" : "Criar Tarefa"}
-        </button>
+          <select
+            value={alunoSelecionado}
+            onChange={(e) => setAlunoSelecionado(e.target.value)}
+            required
+            disabled={!equipeSelecionada}
+          >
+            <option value="">Selecione um aluno</option>
+            {alunos.map((a) => (
+              <option key={a._id} value={a._id}>
+                {a.nome}
+              </option>
+            ))}
+          </select>
 
-        {mensagem && <div className={`mensagem ${tipoMensagem}`}>{mensagem}</div>}
-      </form>
+          <button type="submit">
+            {modoEdicao ? "Salvar Alterações" : "Criar Tarefa"}
+          </button>
 
-      <div className="lista-tarefas">
-        <h3>Tarefas Criadas</h3>
-        {tarefas.length === 0 ? (
-          <p>Nenhuma tarefa cadastrada.</p>
-        ) : (
-          tarefas.map((t) => (
-            <div key={t._id} className={`tarefa-item urgencia-${t.urgencia}`}>
-              <p><strong>Nome da tarefa:</strong> {t.descricao}</p>
-              {t.detalhes && <p><strong>Descrição:</strong> {t.detalhes}</p>}
-              <p><strong>Entrega:</strong> {new Date(t.dataEntrega).toLocaleDateString()}</p>
-              <p><strong>Aluno:</strong> {t.aluno?.nome}</p>
-              <p><strong>Equipe:</strong> {t.equipe?.nome}</p>
-              <p><strong>Status:</strong> {t.status}</p>
-              <p><strong>Urgência:</strong> {t.urgencia.charAt(0).toUpperCase() + t.urgencia.slice(1)}</p>
-              {t.tempoEstimado && (
-                <p><strong>Tempo Estimado:</strong> {t.tempoEstimado} minutos</p>
-              )}
-              {t.tempoGasto > 0 && (
-                <p><strong>Tempo Gasto:</strong> {t.tempoGasto} minutos</p>
-              )}
-              <div className="buttons">
-                <button className="edit-btn" onClick={() => iniciarEdicao(t)}>Editar</button>
-                <button className="delete-btn" onClick={() => deletarTarefa(t._id)}>Excluir</button>
+          {mensagem && <div className={`mensagem ${tipoMensagem}`}>{mensagem}</div>}
+        </form>
+
+        <div className="lista-tarefas">
+          <h3>Tarefas Criadas</h3>
+          {tarefas.length === 0 ? (
+            <p>Nenhuma tarefa cadastrada.</p>
+          ) : (
+            tarefas.map((t) => (
+              <div key={t._id} className={`tarefa-item urgencia-${t.urgencia}`}>
+                <p><strong>Nome da tarefa:</strong> {t.descricao}</p>
+                {t.detalhes && <p><strong>Descrição:</strong> {t.detalhes}</p>}
+                <p><strong>Entrega:</strong> {new Date(t.dataEntrega).toLocaleDateString()}</p>
+                <p><strong>Aluno:</strong> {t.aluno?.nome}</p>
+                <p><strong>Equipe:</strong> {t.equipe?.nome}</p>
+                <p><strong>Status:</strong> {t.status}</p>
+                <p><strong>Urgência:</strong> {t.urgencia.charAt(0).toUpperCase() + t.urgencia.slice(1)}</p>
+                {t.tempoEstimado && (
+                  <p><strong>Tempo Estimado:</strong> {t.tempoEstimado} minutos</p>
+                )}
+                {t.tempoGasto > 0 && (
+                  <p><strong>Tempo Gasto:</strong> {t.tempoGasto} minutos</p>
+                )}
+                <div className="buttons">
+                  <button className="edit-btn" onClick={() => iniciarEdicao(t)}>Editar</button>
+                  <button className="delete-btn" onClick={() => deletarTarefa(t._id)}>Excluir</button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      </main>
     </div>
   );
 }

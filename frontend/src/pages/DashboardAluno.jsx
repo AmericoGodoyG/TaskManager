@@ -73,7 +73,7 @@ function DashboardAluno() {
 
   const buscarNomeAluno = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/alunos/me", {
+      const res = await axios.get("http://localhost:5000/api/alunos", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -135,22 +135,26 @@ function DashboardAluno() {
   };
 
   const atualizarStatus = async () => {
-    try {
-      await axios.patch(
-        `http://localhost:5000/api/tarefas/${tarefaSelecionada._id}/status`,
-        { status: statusAtualizado },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      buscarTarefas();
-      setTarefaSelecionada(null);
-    } catch (err) {
-      console.error("Erro ao atualizar status:", err);
-    }
-  };
+  try {
+    // Log de depuração (opcional)
+    console.log("Atualizando status da tarefa:", tarefaSelecionada._id, "->", statusAtualizado);
+
+    await axios.put(
+      `http://localhost:5000/api/tarefas/${tarefaSelecionada._id}/status`, // <-- CORRIGIDO de .patch para .put
+      { status: statusAtualizado },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    buscarTarefas();
+    setTarefaSelecionada(null);
+  } catch (err) {
+    console.error("Erro ao atualizar status:", err);
+  }
+};
+
 
   const fecharTarefa = () => {
     setTarefaSelecionada(null);
@@ -260,6 +264,22 @@ function DashboardAluno() {
               <p><strong>Entrega:</strong> {new Date(tarefaSelecionada.dataEntrega).toLocaleDateString()}</p>
               <p><strong>Equipe:</strong> {tarefaSelecionada.equipe?.nome}</p>
               <p><strong>Status Atual:</strong> {tarefaSelecionada.status}</p>
+              <div className="status-select">
+                <label><strong>Alterar Status:</strong></label>{' '}
+                <select
+                  value={statusAtualizado}
+                  onChange={(e) => setStatusAtualizado(e.target.value)}
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="em_andamento">Em andamento</option>
+                  <option value="concluido">Concluído</option>
+                </select>
+              </div>
+
+              <button onClick={atualizarStatus} className="atualizar-status-btn">
+                Atualizar Status
+              </button>
+
               {tarefaSelecionada.tempoEstimado && (
                 <p><strong>Tempo Estimado:</strong> {formatarTempo(tarefaSelecionada.tempoEstimado * 60)}</p>
               )}

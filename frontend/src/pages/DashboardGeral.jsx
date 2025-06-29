@@ -51,13 +51,13 @@ function DashboardGeral() {
       const tarefasEquipe = tarefas.filter(tarefa => tarefa.equipe?._id === equipe._id);
       
       const pendentes = tarefasEquipe.filter(t => t.status === 'pendente').length;
-      const emAndamento = tarefasEquipe.filter(t => t.status === 'em andamento').length;
-      const concluidas = tarefasEquipe.filter(t => t.status === 'concluído').length;
+      const emAndamento = tarefasEquipe.filter(t => t.status === 'em_andamento').length;
+      const concluidas = tarefasEquipe.filter(t => t.status === 'concluido').length;
 
       return {
         equipe: equipe.nome,
         dados: {
-          labels: ['Pendentes', 'Em Andamento', 'Concluídas'],
+          labels: ['Pendentes', 'em_andamento', 'concluido'],
           datasets: [{
             data: [pendentes, emAndamento, concluidas],
             backgroundColor: ['#f44336', '#ff9800', '#4caf50'],
@@ -103,10 +103,10 @@ function DashboardGeral() {
     case 'pendente':
       bgColor = '#f44336';
       break;
-    case 'em andamento':
+    case 'em_andamento':
       bgColor = '#ff9800';
       break;
-    case 'concluído':
+    case 'concluido':
       bgColor = '#4caf50';
       break;
     default:

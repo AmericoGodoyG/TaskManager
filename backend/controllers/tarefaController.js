@@ -85,18 +85,33 @@ exports.minhasTarefas = async (req, res) => {
 exports.atualizarStatusAluno = async (req, res) => {
   try {
     const { status } = req.body;
+
+    console.log("Tentando atualizar status...");
+    console.log("ID da tarefa:", req.params.id);
+    console.log("Status recebido:", status);
+
+    if (!status || !["pendente", "em_andamento", "concluido"].includes(status)) {
+      return res.status(400).json({ erro: "Status inválido" });
+    }
+
     const tarefa = await Tarefa.findOne({ _id: req.params.id, aluno: req.user.id });
 
-    if (!tarefa) return res.status(403).json({ erro: 'Você não pode editar essa tarefa' });
+    if (!tarefa) {
+      return res.status(403).json({ erro: 'Você não pode editar essa tarefa' });
+    }
 
     tarefa.status = status;
     await tarefa.save();
 
+    console.log("Status atualizado com sucesso");
     res.json({ msg: 'Status atualizado com sucesso', tarefa });
+
   } catch (err) {
-    res.status(500).json({ erro: 'Erro ao atualizar status' });
+    console.error("Erro ao atualizar status:", err);
+    res.status(500).json({ erro: 'Erro ao atualizar status', detalhe: err.message });
   }
 };
+
 
 // ALUNO: controlar cronômetro
 exports.controlarCronometro = async (req, res) => {

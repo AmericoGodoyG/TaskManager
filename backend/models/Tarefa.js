@@ -6,7 +6,7 @@ const tarefaSchema = new mongoose.Schema({
   dataEntrega: { type: Date, required: true },
   status: {
     type: String,
-    enum: ['pendente', 'em andamento', 'concluído'],
+    enum: ['pendente', 'em_andamento', 'concluido'],
     default: 'pendente'
   },
   aluno: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

@@ -60,6 +60,16 @@
   background-color: #0056b3;
 }
 
+.status-select {
+  margin-bottom: 10px;
+}
+
+.status-select select {
+  margin-left: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
 .start-btn {
   background-color: #28a745 !important;
   color: white !important;
